@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MakiLauncher — Официальный сайт и лаунчер Minecraft</title>
 <meta name="description" content="MakiLauncher — современный игровой лаунчер Minecraft со встроенной синхронизацией авторских сборок, поддержкой скинов и быстрой установкой.">
+<link rel="icon" type="image/png" href="assets/icon.png">
+<link rel="shortcut icon" href="favicon.ico">
 <style>
   :root {
     --bg-main: #0a0b10;
@@ -48,12 +50,11 @@
     color: var(--text-white); text-decoration: none;
   }
   .brand-badge {
-    width: 32px; height: 32px; border-radius: 8px;
-    background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+    width: 36px; height: 36px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 16px rgba(254, 94, 16, 0.45);
+    filter: drop-shadow(0 0 10px rgba(254, 94, 16, 0.45));
   }
-  .brand-badge svg { width: 18px; height: 18px; fill: #ffffff; }
+  .brand-badge img { width: 100%; height: 100%; object-fit: contain; display: block; }
   .brand-name span { color: var(--accent-orange); }
 
   .nav-menu { display: flex; align-items: center; gap: 8px; }
@@ -299,7 +300,7 @@
 <nav>
   <a class="nav-brand" href="index.html">
     <div class="brand-badge">
-      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
+      <img src="assets/icon.png" alt="MakiLauncher">
     </div>
     <div class="brand-name">Maki<span>Launcher</span></div>
   </a>
@@ -510,24 +511,38 @@ async function loadDashboardPacks() {
   const container = document.getElementById('packs-container');
   let packs = [];
 
-  // Try dashboard localStorage first
+  // Try dashboard localStorage first ('maki_data' from dashboard.html)
   try {
-    const raw = localStorage.getItem('makilauncher_web_data');
+    const raw = localStorage.getItem('maki_data') || localStorage.getItem('makilauncher_web_data');
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed.modpacks && parsed.modpacks.length > 0) {
+      if (parsed && Array.isArray(parsed.modpacks) && parsed.modpacks.length > 0) {
         packs = parsed.modpacks;
       }
     }
   } catch(e) {}
 
-  // If empty, fetch live manifest.json
+  // If empty (visitor browser), fetch live manifest.json from GitHub API or local manifest.json
   if (!packs || packs.length === 0) {
     try {
-      const res = await fetch('manifest.json');
+      const apiRes = await fetch('https://api.github.com/repos/tokyoown/MakiSite/contents/manifest.json?t=' + Date.now(), {
+        headers: { 'Accept': 'application/vnd.github.v3.raw' }
+      });
+      if (apiRes.ok) {
+        const data = await apiRes.json();
+        if (data && Array.isArray(data.modpacks) && data.modpacks.length > 0) {
+          packs = data.modpacks;
+        }
+      }
+    } catch(e) {}
+  }
+
+  if (!packs || packs.length === 0) {
+    try {
+      const res = await fetch('manifest.json?t=' + Date.now());
       if (res.ok) {
         const data = await res.json();
-        if (data.modpacks && data.modpacks.length > 0) {
+        if (data && Array.isArray(data.modpacks) && data.modpacks.length > 0) {
           packs = data.modpacks;
         }
       }
