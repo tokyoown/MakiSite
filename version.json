@@ -1,8 +1,8 @@
 {
   "Version": "1.0.0",
-  "ReleaseNotes": "Первый релиз MakiLauncher! Доступна сборка ATM10.",
-  "DownloadUrl": "https://github.com/tokyoown/MakiLauncher/releases/latest/download/MakiLauncher-Setup.exe",
-  "SetupUrl": "https://github.com/tokyoown/MakiLauncher/releases/latest/download/MakiLauncher-Setup.exe",
-  "Mandatory": false,
+  "ReleaseNotes": "Первая публикация лаунчера!",
+  "DownloadUrl": "https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe",
+  "SetupUrl": "https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe",
+  "Mandatory": true,
   "PubDate": "12.10.2026"
 }
