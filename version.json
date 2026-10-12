@@ -1,8 +1,8 @@
 {
   "Version": "1.0.1",
   "ReleaseNotes": "Обновление синхронизации!",
-  "DownloadUrl": "https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe",
-  "SetupUrl": "https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe",
+  "DownloadUrl": "github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe",
+  "SetupUrl": "github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe",
   "Mandatory": true,
   "PubDate": "12.10.2026"
 }
