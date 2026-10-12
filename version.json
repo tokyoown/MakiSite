@@ -1,8 +1,8 @@
 {
-  "Version": "1.0.3",
-  "ReleaseNotes": "Обновление синхронизации и скины!",
+  "Version": "1.0.4",
+  "ReleaseNotes": "Обновление MakiLauncher 1.0.4: полная настройка баннера сборок через сайт, сохранение миров и новая иконка.",
   "DownloadUrl": "https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe",
   "SetupUrl": "https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe",
-  "Mandatory": true,
-  "PubDate": "12.10.2026"
+  "Mandatory": false,
+  "PubDate": "13.10.2026"
 }
