@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MakiLauncher — Панель управления</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #0e0e16;
+    --surface: #13131c;
+    --surface2: #1a1a27;
+    --surface3: #20202f;
+    --border: #252535;
+    --accent: #7c3aed;
+    --accent2: #a855f7;
+    --accent3: #c084fc;
+    --glow: rgba(124,58,237,0.35);
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --blue: #3b82f6;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #475569;
+    --radius: 12px;
+  }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  header {
+    height: 62px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 17px; font-weight: 800; text-decoration: none; color: var(--text);
+  }
+  .header-logo-icon {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 0 15px var(--glow);
+  }
+  .header-logo span { color: var(--accent2); }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .header-user {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 12px;
+    font-size: 13px; color: var(--text2);
+  }
+  .btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 0 15px var(--glow); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 25px var(--glow); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent3); }
+  .btn-danger { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+  .btn-danger:hover { background: rgba(239,68,68,0.2); }
+  .btn-success { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+  .btn-success:hover { background: rgba(34,197,94,0.2); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-logout { background: none; border: none; cursor: pointer; padding: 8px 12px; border-radius: 8px; color: var(--text3); font-size: 13px; transition: all 0.2s; }
+  .btn-logout:hover { background: rgba(239,68,68,0.1); color: var(--red); }
+
+  /* ── Layout ── */
+  .layout { display: flex; flex: 1; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 210px; background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 12px;
+    position: sticky; top: 62px;
+    height: calc(100vh - 62px);
+    overflow-y: auto; flex-shrink: 0;
+  }
+  .sidebar-section { margin-bottom: 24px; }
+  .sidebar-label {
+    font-size: 10px; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 1.2px;
+    padding: 0 8px; margin-bottom: 6px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 10px; border-radius: 8px; cursor: pointer;
+    font-size: 13.5px; color: var(--text2); margin-bottom: 2px;
+    transition: all 0.15s; border: none; background: none;
+    width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(124,58,237,0.14); color: var(--accent3); font-weight: 600; }
+  .nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+
+  /* ── Main ── */
+  main { flex: 1; padding: 28px; overflow-x: hidden; min-width: 0; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-header { margin-bottom: 24px; }
+  .page-title { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .page-sub { font-size: 13px; color: var(--text3); }
+
+  /* ── Stats ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 14px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: rgba(124,58,237,0.35); }
+  .stat-label { font-size: 11px; color: var(--text3); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; }
+  .stat-value { font-size: 26px; font-weight: 800; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 18px; overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title { font-size: 15px; font-weight: 700; }
+  .card-body { padding: 20px; }
+
+  /* ── Table ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 600px; }
+  th {
+    text-align: left; padding: 9px 14px;
+    font-size: 10px; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  td { padding: 13px 14px; border-bottom: 1px solid rgba(37,37,53,0.5); font-size: 13.5px; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(124,58,237,0.03); }
+  .pack-name { font-weight: 700; }
+  .pack-id { font-size: 11px; color: var(--text3); font-family: monospace; margin-top: 2px; }
+  .tag {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px; border-radius: 5px; font-size: 11px; font-weight: 700;
+  }
+  .tag-neo { background: rgba(168,85,247,0.12); color: var(--accent2); border: 1px solid rgba(168,85,247,0.25); }
+  .tag-forge { background: rgba(245,158,11,0.12); color: var(--yellow); border: 1px solid rgba(245,158,11,0.25); }
+  .tag-fabric { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+  .tag-vanilla { background: rgba(148,163,184,0.1); color: var(--text2); border: 1px solid var(--border); }
+  .row-actions { display: flex; gap: 6px; white-space: nowrap; }
+
+  /* ── Form ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 12px; font-weight: 600; color: var(--text2); }
+  input[type=text], input[type=number], input[type=url], input[type=date], input[type=password], select, textarea {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 12px;
+    color: var(--text); font-size: 13.5px; font-family: inherit;
+    outline: none; width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,58,237,0.18);
+  }
+  textarea { resize: vertical; min-height: 75px; }
+  select option { background: var(--surface2); }
+  .hint { font-size: 11px; color: var(--text3); margin-top: 3px; }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; }
+  .checkbox-row input[type=checkbox] { width: auto; }
+
+  /* ── Modal ── */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    display: none; align-items: center; justify-content: center;
+    z-index: 500; backdrop-filter: blur(6px);
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; width: 560px; max-width: 95vw;
+    max-height: 90vh; overflow-y: auto;
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from { transform: translateY(20px); opacity:0; } to { transform: none; opacity:1; } }
+  .modal-header {
+    padding: 20px 22px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-title { font-size: 17px; font-weight: 700; }
+  .modal-close { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 22px; padding: 2px; transition: color 0.15s; }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 22px; }
+  .modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* ── Export ── */
+  .export-pre {
+    background: #070710; border: 1px solid var(--border);
+    border-radius: 9px; padding: 16px;
+    font-family: 'Consolas', monospace; font-size: 12px; color: #86efac;
+    white-space: pre-wrap; word-break: break-all;
+    max-height: 260px; overflow-y: auto; line-height: 1.6;
+  }
+  .copy-row { display: flex; gap: 8px; margin-top: 10px; }
+
+  /* ── Toast ── */
+  #toasts { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 9px; padding: 12px 16px; min-width: 260px;
+    display: flex; align-items: center; gap: 10px; font-size: 13px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    animation: toastIn 0.3s ease;
+  }
+  @keyframes toastIn { from { transform: translateX(100%); opacity:0; } to { transform: none; opacity:1; } }
+  .toast-success { border-left: 3px solid var(--green); }
+  .toast-error { border-left: 3px solid var(--red); }
+  .toast-info { border-left: 3px solid var(--accent2); }
+
+  /* ── GitHub section ── */
+  .gh-box {
+    background: rgba(124,58,237,0.06); border: 1px solid rgba(124,58,237,0.2);
+    border-radius: 12px; padding: 20px; margin-bottom: 18px;
+  }
+  .gh-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; display: flex; gap: 8px; align-items: center; }
+  .publish-progress {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px; margin-top: 12px;
+    font-size: 13px; display: none; gap: 10px; align-items: center;
+  }
+  .publish-progress.show { display: flex; }
+  .spinner { width:16px;height:16px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin 0.7s linear infinite;flex-shrink:0; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  /* ── News ── */
+  .news-item {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .news-icon { font-size: 20px; flex-shrink: 0; }
+  .news-body-text { flex: 1; min-width: 0; }
+  .news-title { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
+  .news-text { font-size: 13px; color: var(--text2); line-height: 1.5; white-space: pre-wrap; }
+  .news-date { font-size: 11px; color: var(--text3); margin-top: 5px; }
+  .empty { text-align:center; padding:50px 0; color:var(--text3); }
+  .empty-icon { font-size:40px; margin-bottom:12px; }
+  .empty-title { font-size:16px; font-weight:600; color:var(--text2); margin-bottom:5px; }
+
+  /* ── Version page ── */
+  .version-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px; margin-bottom: 16px;
+  }
+  .version-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25);
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 12px; font-weight: 600; color: var(--green); margin-bottom: 12px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <a class="header-logo" href="index.html">
+    <div class="header-logo-icon">⚡</div>
+    Maki<span>Launcher</span>
+  </a>
+  <div class="header-right">
+    <div class="header-user">👑 <span id="user-label">tokyo_own_admin</span></div>
+    <a href="index.html" class="btn btn-secondary btn-sm">🌐 Сайт</a>
+    <button class="btn-logout" onclick="logout()">Выйти →</button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Главное</div>
+      <button class="nav-item active" onclick="showPage('overview',this)"><span class="nav-icon">📊</span>Обзор</button>
+      <button class="nav-item" onclick="showPage('modpacks',this)"><span class="nav-icon">📦</span>Сборки</button>
+      <button class="nav-item" onclick="showPage('news',this)"><span class="nav-icon">📰</span>Новости</button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Система</div>
+      <button class="nav-item" onclick="showPage('version',this)"><span class="nav-icon">🔄</span>Версия</button>
+      <button class="nav-item" onclick="showPage('publish',this)"><span class="nav-icon">🚀</span>Публикация</button>
+      <button class="nav-item" onclick="showPage('settings',this)"><span class="nav-icon">⚙️</span>Настройки</button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main>
+
+    <!-- ─── OVERVIEW ─── -->
+    <div class="page active" id="page-overview">
+      <div class="page-header">
+        <div class="page-title">📊 Обзор</div>
+        <div class="page-sub">Быстрая сводка по всем данным MakiLauncher</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">📦 Сборок</div><div class="stat-value" style="color:var(--accent2)" id="ov-packs">0</div></div>
+        <div class="stat-card"><div class="stat-label">📰 Новостей</div><div class="stat-value" style="color:var(--yellow)" id="ov-news">0</div></div>
+        <div class="stat-card"><div class="stat-label">🔄 Версия лаунчера</div><div class="stat-value" style="color:var(--green)" id="ov-ver">—</div></div>
+        <div class="stat-card"><div class="stat-label">📡 Статус GitHub</div><div class="stat-value" style="font-size:16px;margin-top:4px" id="ov-github">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Последние сборки</div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modpack')">➕ Добавить</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Сборка</th><th>MC</th><th>Загрузчик</th><th>Размер</th><th>Статус</th></tr></thead>
+            <tbody id="ov-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── MODPACKS ─── -->
+    <div class="page" id="page-modpacks">
+      <div class="page-header">
+        <div class="page-title">📦 Сборки</div>
+        <div class="page-sub">Управляй модпаками — добавляй, редактируй, удаляй</div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Все сборки (<span id="mp-count">0</span>)</div>
+          <button class="btn btn-primary" onclick="openModal('modpack')">➕ Добавить сборку</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Сборка</th><th>Minecraft</th><th>Загрузчик</th><th>Размер</th><th>Папка</th><th>Действия</th></tr></thead>
+            <tbody id="mp-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── NEWS ─── -->
+    <div class="page" id="page-news">
+      <div class="page-header">
+        <div class="page-title">📰 Новости</div>
+        <div class="page-sub">Новости и объявления в лаунчере</div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Лента (<span id="news-count">0</span>)</div>
+          <button class="btn btn-primary" onclick="openModal('news')">➕ Добавить</button>
+        </div>
+        <div class="card-body" id="news-list"></div>
+      </div>
+    </div>
+
+    <!-- ─── VERSION ─── -->
+    <div class="page" id="page-version">
+      <div class="page-header">
+        <div class="page-title">🔄 Версия лаунчера</div>
+        <div class="page-sub">Управление автообновлением клиента</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Параметры version.json</div></div>
+        <div class="card-body">
+          <div class="version-badge">🟢 Текущая: <span id="ver-current-label">1.0.0</span></div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Номер версии</label>
+              <input type="text" id="ver-num" placeholder="1.0.0" />
+            </div>
+            <div class="form-group">
+              <label>Дата релиза</label>
+              <input type="date" id="ver-date" />
+            </div>
+            <div class="form-group full">
+              <label>URL для скачивания Setup.exe</label>
+              <input type="url" id="ver-url" placeholder="https://github.com/tokyoown/MakiLauncher/releases/download/v1.0.0/MakiLauncher-Setup.exe" />
+              <div class="hint">Ссылка на файл в GitHub Releases. Используй /releases/latest/download/ чтобы всегда указывало на последний релиз.</div>
+            </div>
+            <div class="form-group full">
+              <label>Примечания к релизу</label>
+              <textarea id="ver-notes" placeholder="Что нового..."></textarea>
+            </div>
+            <div class="form-group full">
+              <div class="checkbox-row">
+                <input type="checkbox" id="ver-mandatory" />
+                <label for="ver-mandatory" style="cursor:pointer">Обязательное обновление (принудительная установка)</label>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:18px">
+            <button class="btn btn-primary" onclick="saveVersion()">💾 Сохранить</button>
+            <button class="btn btn-secondary" onclick="previewJSON('version')">👁 Preview</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── PUBLISH ─── -->
+    <div class="page" id="page-publish">
+      <div class="page-header">
+        <div class="page-title">🚀 Публикация на GitHub</div>
+        <div class="page-sub">Отправь manifest.json и version.json на GitHub Pages — лаунчер обновится автоматически</div>
+      </div>
+
+      <div class="gh-box">
+        <h3>🔑 GitHub API настройки</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>GitHub Username</label>
+            <input type="text" id="gh-user" placeholder="tokyoown" />
+          </div>
+          <div class="form-group">
+            <label>Repository Name</label>
+            <input type="text" id="gh-repo" placeholder="MakiLauncher" />
+          </div>
+          <div class="form-group full">
+            <label>Personal Access Token</label>
+            <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx" />
+            <div class="hint">Нужен scope: repo → contents:write. Хранится в браузере локально.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+          <button class="btn btn-secondary" onclick="saveGH()">💾 Сохранить</button>
+          <button class="btn btn-secondary" onclick="testGH()">🔍 Проверить токен</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Публикация файлов</div></div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--text2);margin-bottom:16px">
+            Нажми кнопку — оба файла (<code>manifest.json</code> и <code>version.json</code>) будут опубликованы на GitHub Pages.
+            Через 1-2 минуты лаунчер у всех пользователей подтянет обновления.
+          </p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="publishAll()" id="pub-btn">🚀 Опубликовать всё</button>
+            <button class="btn btn-secondary" onclick="publishFile('manifest.json')">📦 Только manifest.json</button>
+            <button class="btn btn-secondary" onclick="publishFile('version.json')">🔄 Только version.json</button>
+          </div>
+          <div class="publish-progress" id="pub-progress">
+            <span class="spinner"></span>
+            <span id="pub-progress-text">Публикация...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 manifest.json</div>
+          <button class="btn btn-secondary btn-sm" onclick="refreshExports()">🔄</button>
+        </div>
+        <div class="card-body">
+          <div class="export-pre" id="exp-manifest"></div>
+          <div class="copy-row">
+            <button class="btn btn-success btn-sm" onclick="dlFile('manifest.json', buildManifest())">⬇️ Скачать</button>
+            <button class="btn btn-secondary btn-sm" onclick="copyText(buildManifest())">📋 Копировать</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">📋 version.json</div></div>
+        <div class="card-body">
+          <div class="export-pre" id="exp-version"></div>
+          <div class="copy-row">
+            <button class="btn btn-success btn-sm" onclick="dlFile('version.json', buildVersion())">⬇️ Скачать</button>
+            <button class="btn btn-secondary btn-sm" onclick="copyText(buildVersion())">📋 Копировать</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SETTINGS ─── -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <div class="page-title">⚙️ Настройки</div>
+        <div class="page-sub">Параметры сайта и лаунчера</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🌐 Ссылки проекта</div></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group full">
+              <label>URL manifest.json (в лаунчере)</label>
+              <input type="url" id="cfg-manifest-url" value="https://tokyoown.github.io/MakiLauncher/manifest.json" />
+              <div class="hint">Это значение в launcher_config.json → CloudManifestUrl</div>
+            </div>
+            <div class="form-group full">
+              <label>URL version.json (для автообновления)</label>
+              <input type="url" id="cfg-version-url" value="https://tokyoown.github.io/MakiLauncher/version.json" />
+            </div>
+          </div>
+          <div style="margin-top:16px">
+            <button class="btn btn-secondary" onclick="toast('Ссылки сохранены','success')">💾 Сохранить</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🗑️ Сброс данных</div></div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Удалить все сохранённые данные (сборки, новости, настройки) из браузера. Данные на GitHub останутся.</p>
+          <button class="btn btn-danger" onclick="resetData()">🗑️ Сбросить все данные</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ─── MODAL: Modpack ─── -->
+<div class="overlay" id="modal-modpack">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="mp-modal-title">Добавить сборку</div>
+      <button class="modal-close" onclick="closeModal('modpack')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="mp-edit-idx" value="-1" />
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ID (латиница)</label>
+          <input type="text" id="mp-id" placeholder="atm10" />
+        </div>
+        <div class="form-group">
+          <label>Название</label>
+          <input type="text" id="mp-name" placeholder="ATM10" />
+        </div>
+        <div class="form-group">
+          <label>Версия сборки</label>
+          <input type="text" id="mp-ver" placeholder="1.0.0" />
+        </div>
+        <div class="form-group">
+          <label>Версия Minecraft</label>
+          <input type="text" id="mp-mcver" placeholder="1.21.1" />
+        </div>
+        <div class="form-group">
+          <label>Загрузчик</label>
+          <select id="mp-loader">
+            <option>NeoForge</option><option>Forge</option>
+            <option>Fabric</option><option>Quilt</option><option>Vanilla</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Версия загрузчика</label>
+          <input type="text" id="mp-loader-ver" placeholder="21.1.x" />
+        </div>
+        <div class="form-group">
+          <label>Папка клиента</label>
+          <input type="text" id="mp-folder" placeholder="atm10" />
+        </div>
+        <div class="form-group">
+          <label>Размер (МБ)</label>
+          <input type="number" id="mp-size" placeholder="1548" />
+        </div>
+        <div class="form-group">
+          <label>Автор</label>
+          <input type="text" id="mp-author" placeholder="Tokyo_own" />
+        </div>
+        <div class="form-group">
+          <label>URL баннера</label>
+          <input type="url" id="mp-banner" placeholder="https://..." />
+        </div>
+        <div class="form-group full">
+          <label>Ссылка для скачивания</label>
+          <input type="url" id="mp-url" placeholder="https://drive.google.com/..." />
+          <div class="hint">Google Drive, Yandex Disk, Dropbox или прямая ссылка</div>
+        </div>
+        <div class="form-group full">
+          <label>Описание</label>
+          <textarea id="mp-desc" placeholder="Описание сборки..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modpack')">Отмена</button>
+      <button class="btn btn-primary" onclick="savePack()">💾 Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MODAL: News ─── -->
+<div class="overlay" id="modal-news">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="news-modal-title">Добавить новость</div>
+      <button class="modal-close" onclick="closeModal('news')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="news-edit-idx" value="-1" />
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Заголовок</label>
+          <input type="text" id="n-title" placeholder="Новая сборка вышла!" />
+        </div>
+        <div class="form-group full">
+          <label>Текст</label>
+          <textarea id="n-text" rows="4" placeholder="Подробности..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Дата</label>
+          <input type="date" id="n-date" />
+        </div>
+        <div class="form-group">
+          <label>Иконка (эмодзи)</label>
+          <input type="text" id="n-icon" placeholder="🎮" maxlength="4" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('news')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveNews()">💾 Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MODAL: JSON Preview ─── -->
+<div class="overlay" id="modal-preview">
+  <div class="modal" style="width:600px">
+    <div class="modal-header">
+      <div class="modal-title" id="preview-title">Preview</div>
+      <button class="modal-close" onclick="closeModal('preview')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="export-pre" id="preview-content"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('preview')">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+const SESSION_KEY = 'maki_admin_session';
+const GH_KEY = 'maki_github';
+const DATA_KEY = 'maki_data';
+
+// ── Auth check ──────────────────────────────────────────────────────────────
+if (!sessionStorage.getItem(SESSION_KEY)) {
+  window.location.href = 'login.html';
+}
+
+// ── State ───────────────────────────────────────────────────────────────────
+let S = {
+  modpacks: [],
+  news: [],
+  version: { Version:'1.0.0', ReleaseNotes:'', DownloadUrl:'', SetupUrl:'', Mandatory:false, PubDate:'' },
+  github: { user:'', repo:'', token:'' }
+};
+
+function loadState() {
+  try {
+    const d = localStorage.getItem(DATA_KEY);
+    if (d) { const p = JSON.parse(d); S.modpacks = p.modpacks||[]; S.news = p.news||[]; S.version = p.version||S.version; }
+  } catch(e) {}
+  try {
+    const g = localStorage.getItem(GH_KEY);
+    if (g) S.github = JSON.parse(g);
+  } catch(e) {}
+
+  // Defaults
+  if (S.modpacks.length === 0) S.modpacks = [{
+    id:'atm10', name:'ATM10', version:'1.0.0', minecraftVersion:'1.21.1',
+    modLoader:'NeoForge', loaderVersion:'21.1.x',
+    description:'All the Mods 10 — огромный модпак с сотнями модов для Minecraft 1.21.1.',
+    downloadUrl:'https://drive.google.com/file/d/1Sbf_TcGY7iBIe8Ml5Yg5Zah_SyexG4VS/view?usp=sharing',
+    clientFolder:'atm10', author:'Tokyo_own', sizeMb:1548, banner:''
+  }];
+}
+function saveState() { localStorage.setItem(DATA_KEY, JSON.stringify({ modpacks:S.modpacks, news:S.news, version:S.version })); }
+
+// ── Nav ─────────────────────────────────────────────────────────────────────
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  if (id === 'publish') { refreshExports(); loadGHInputs(); }
+  if (id === 'version') loadVersionInputs();
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function renderAll() {
+  // Stats
+  document.getElementById('ov-packs').textContent = S.modpacks.length;
+  document.getElementById('ov-news').textContent = S.news.length;
+  document.getElementById('ov-ver').textContent = S.version.Version || '—';
+  document.getElementById('ov-github').innerHTML = S.github.token
+    ? '<span style="color:var(--green)">✅ Настроен</span>'
+    : '<span style="color:var(--text3)">⚠️ Не настроен</span>';
+
+  // Modpack count
+  document.getElementById('mp-count').textContent = S.modpacks.length;
+  document.getElementById('news-count').textContent = S.news.length;
+
+  // Overview table
+  const ovTb = document.getElementById('ov-table');
+  ovTb.innerHTML = S.modpacks.length === 0
+    ? '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:30px">Нет сборок</td></tr>'
+    : S.modpacks.slice(0,5).map(p => `<tr>
+        <td><div class="pack-name">${esc(p.name)}</div></td>
+        <td>${esc(p.minecraftVersion)}</td>
+        <td>${loaderTag(p.modLoader)}</td>
+        <td>${p.sizeMb} МБ</td>
+        <td><span style="color:var(--green);font-size:12px">● Активна</span></td>
+      </tr>`).join('');
+
+  // Modpacks table
+  const mpTb = document.getElementById('mp-table');
+  mpTb.innerHTML = S.modpacks.length === 0
+    ? '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:40px">Нет сборок — добавь первую!</td></tr>'
+    : S.modpacks.map((p,i) => `<tr>
+        <td><div class="pack-name">${esc(p.name)}</div><div class="pack-id">${esc(p.id)}</div></td>
+        <td>${esc(p.minecraftVersion)}</td>
+        <td>${loaderTag(p.modLoader)} <span style="font-size:11px;color:var(--text3)">${esc(p.loaderVersion||'')}</span></td>
+        <td>${p.sizeMb} МБ</td>
+        <td><code style="background:var(--surface2);padding:2px 7px;border-radius:5px;font-size:11px">${esc(p.clientFolder)}</code></td>
+        <td><div class="row-actions">
+          <button class="btn btn-secondary btn-sm" onclick="editPack(${i})">✏️ Изменить</button>
+          <button class="btn btn-danger btn-sm" onclick="deletePack(${i})">🗑️</button>
+        </div></td>
+      </tr>`).join('');
+
+  // News
+  const nl = document.getElementById('news-list');
+  nl.innerHTML = S.news.length === 0
+    ? '<div class="empty"><div class="empty-icon">📰</div><div class="empty-title">Нет новостей</div></div>'
+    : S.news.map((n,i) => `<div class="news-item">
+        <div class="news-icon">${n.icon||'📢'}</div>
+        <div class="news-body-text">
+          <div class="news-title">${esc(n.title)}</div>
+          <div class="news-text">${esc(n.text)}</div>
+          <div class="news-date">${esc(n.date||'')}</div>
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-secondary btn-sm" onclick="editNews(${i})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteNews(${i})">🗑️</button>
+        </div>
+      </div>`).join('');
+}
+
+function loaderTag(l) {
+  const m = {NeoForge:'neo',Forge:'forge',Fabric:'fabric',Quilt:'fabric',Vanilla:'vanilla'};
+  return `<span class="tag tag-${m[l]||'vanilla'}">${esc(l)}</span>`;
+}
+
+// ── Modpacks ─────────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById('modal-' + id).classList.add('open'); }
+function closeModal(id) { document.getElementById('modal-' + id).classList.remove('open'); }
+
+function editPack(i) {
+  const p = S.modpacks[i];
+  document.getElementById('mp-modal-title').textContent = 'Редактировать сборку';
+  document.getElementById('mp-edit-idx').value = i;
+  document.getElementById('mp-id').value = p.id;
+  document.getElementById('mp-name').value = p.name;
+  document.getElementById('mp-ver').value = p.version;
+  document.getElementById('mp-mcver').value = p.minecraftVersion;
+  document.getElementById('mp-loader').value = p.modLoader;
+  document.getElementById('mp-loader-ver').value = p.loaderVersion||'';
+  document.getElementById('mp-folder').value = p.clientFolder;
+  document.getElementById('mp-size').value = p.sizeMb;
+  document.getElementById('mp-author').value = p.author||'';
+  document.getElementById('mp-banner').value = p.banner||'';
+  document.getElementById('mp-url').value = p.downloadUrl;
+  document.getElementById('mp-desc').value = p.description||'';
+  openModal('modpack');
+}
+function savePack() {
+  const idx = parseInt(document.getElementById('mp-edit-idx').value);
+  const pack = {
+    id: v('mp-id'), name: v('mp-name'), version: v('mp-ver')||'1.0.0',
+    minecraftVersion: v('mp-mcver'), modLoader: v('mp-loader'),
+    loaderVersion: v('mp-loader-ver'), description: v('mp-desc'),
+    downloadUrl: v('mp-url'), clientFolder: v('mp-folder'),
+    author: v('mp-author'), sizeMb: parseInt(v('mp-size'))||0, banner: v('mp-banner')
+  };
+  if (!pack.id||!pack.name||!pack.downloadUrl) { toast('⚠️ Заполни ID, название и ссылку!','error'); return; }
+  if (idx === -1) { S.modpacks.push(pack); toast('✅ Сборка добавлена: '+pack.name,'success'); }
+  else { S.modpacks[idx] = pack; toast('✅ Сборка обновлена','success'); }
+  saveState(); renderAll(); closeModal('modpack');
+  // Reset form
+  document.getElementById('mp-edit-idx').value = '-1';
+  document.getElementById('mp-modal-title').textContent = 'Добавить сборку';
+}
+function deletePack(i) {
+  if (!confirm('Удалить "'+S.modpacks[i].name+'"?')) return;
+  S.modpacks.splice(i,1); saveState(); renderAll();
+  toast('🗑️ Сборка удалена','info');
+}
+
+// ── News ─────────────────────────────────────────────────────────────────────
+function editNews(i) {
+  const n = S.news[i];
+  document.getElementById('news-modal-title').textContent = 'Редактировать новость';
+  document.getElementById('news-edit-idx').value = i;
+  document.getElementById('n-title').value = n.title;
+  document.getElementById('n-text').value = n.text;
+  document.getElementById('n-date').value = n.date||'';
+  document.getElementById('n-icon').value = n.icon||'📢';
+  openModal('news');
+}
+function saveNews() {
+  const idx = parseInt(document.getElementById('news-edit-idx').value);
+  const item = { title:v('n-title'), text:v('n-text'), date:v('n-date'), icon:v('n-icon')||'📢' };
+  if (!item.title||!item.text) { toast('⚠️ Заполни заголовок и текст!','error'); return; }
+  if (idx === -1) { S.news.push(item); toast('✅ Новость добавлена','success'); }
+  else { S.news[idx] = item; toast('✅ Новость обновлена','success'); }
+  saveState(); renderAll(); closeModal('news');
+  document.getElementById('news-edit-idx').value = '-1';
+}
+function deleteNews(i) {
+  if (!confirm('Удалить новость?')) return;
+  S.news.splice(i,1); saveState(); renderAll(); toast('🗑️ Новость удалена','info');
+}
+
+// ── Version ──────────────────────────────────────────────────────────────────
+function loadVersionInputs() {
+  document.getElementById('ver-num').value = S.version.Version||'1.0.0';
+  document.getElementById('ver-notes').value = S.version.ReleaseNotes||'';
+  document.getElementById('ver-url').value = S.version.SetupUrl||S.version.DownloadUrl||'';
+  document.getElementById('ver-mandatory').checked = S.version.Mandatory||false;
+  if (S.version.PubDate) {
+    const p = S.version.PubDate.split('.');
+    if (p.length===3) document.getElementById('ver-date').value = p[2]+'-'+p[1]+'-'+p[0];
+  }
+}
+function saveVersion() {
+  const raw = document.getElementById('ver-date').value;
+  let date = raw;
+  if (raw) { const p=raw.split('-'); date=p[2]+'.'+p[1]+'.'+p[0]; }
+  const url = document.getElementById('ver-url').value.trim();
+  S.version = { Version:v('ver-num')||'1.0.0', ReleaseNotes:v('ver-notes'), DownloadUrl:url, SetupUrl:url, Mandatory:document.getElementById('ver-mandatory').checked, PubDate:date };
+  document.getElementById('ver-current-label').textContent = S.version.Version;
+  saveState(); renderAll(); refreshExports(); toast('✅ Версия сохранена','success');
+}
+
+// ── JSON ─────────────────────────────────────────────────────────────────────
+function buildManifest() { return JSON.stringify({modpacks:S.modpacks, news:S.news}, null, 2); }
+function buildVersion() { return JSON.stringify(S.version, null, 2); }
+function refreshExports() {
+  const me = document.getElementById('exp-manifest');
+  const ve = document.getElementById('exp-version');
+  if (me) me.textContent = buildManifest();
+  if (ve) ve.textContent = buildVersion();
+}
+function previewJSON(type) {
+  document.getElementById('preview-title').textContent = type === 'version' ? 'version.json' : 'manifest.json';
+  document.getElementById('preview-content').textContent = type === 'version' ? buildVersion() : buildManifest();
+  openModal('preview');
+}
+
+// ── GitHub ────────────────────────────────────────────────────────────────────
+function loadGHInputs() {
+  document.getElementById('gh-user').value = S.github.user||'';
+  document.getElementById('gh-repo').value = S.github.repo||'';
+  document.getElementById('gh-token').value = S.github.token||'';
+}
+function saveGH() {
+  S.github.user = document.getElementById('gh-user').value.trim();
+  S.github.repo = document.getElementById('gh-repo').value.trim();
+  S.github.token = document.getElementById('gh-token').value.trim();
+  localStorage.setItem(GH_KEY, JSON.stringify(S.github));
+  renderAll(); toast('✅ GitHub настройки сохранены','success');
+}
+async function testGH() {
+  const t = document.getElementById('gh-token').value.trim();
+  if (!t) { toast('⚠️ Введи токен!','error'); return; }
+  try {
+    const r = await fetch('https://api.github.com/user', { headers:{Authorization:'token '+t} });
+    const d = await r.json();
+    if (d.login) toast('✅ Токен OK — '+d.login,'success');
+    else toast('❌ Токен недействителен','error');
+  } catch(e) { toast('❌ '+e.message,'error'); }
+}
+
+async function publishFile(filename) {
+  saveGH();
+  const { user, repo, token } = S.github;
+  if (!user||!repo||!token) { toast('⚠️ Настрой GitHub в разделе Публикация!','error'); return; }
+  const content = filename === 'manifest.json' ? buildManifest() : buildVersion();
+  try {
+    let sha = null;
+    const gr = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${filename}`, {headers:{Authorization:'token '+token}});
+    if (gr.ok) sha = (await gr.json()).sha;
+    const body = { message:'Dashboard: update '+filename, content:btoa(unescape(encodeURIComponent(content))) };
+    if (sha) body.sha = sha;
+    const pr = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${filename}`, {method:'PUT',headers:{Authorization:'token '+token,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if (pr.ok) toast('✅ '+filename+' опубликован!','success');
+    else { const e=await pr.json(); toast('❌ '+filename+': '+(e.message||'ошибка'),'error'); }
+  } catch(e) { toast('❌ '+e.message,'error'); }
+}
+
+async function publishAll() {
+  saveGH();
+  const { user, repo, token } = S.github;
+  if (!user||!repo||!token) { toast('⚠️ Настрой GitHub в разделе Публикация!','error'); return; }
+  const prog = document.getElementById('pub-progress');
+  const progText = document.getElementById('pub-progress-text');
+  prog.classList.add('show');
+  progText.textContent = 'Публикация manifest.json...';
+  await publishFile('manifest.json');
+  progText.textContent = 'Публикация version.json...';
+  await publishFile('version.json');
+  prog.classList.remove('show');
+  toast('🎉 Готово! Оба файла опубликованы. Лаунчер обновится при следующем запуске.','success');
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function v(id) { return (document.getElementById(id)||{}).value||''; }
+function esc(s) { return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):''; }
+function dlFile(name, content) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content],{type:'application/json'}));
+  a.download = name; a.click();
+  toast('⬇️ '+name+' скачан','success');
+}
+function copyText(t) { navigator.clipboard.writeText(t); toast('📋 Скопировано!','info'); }
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = 'toast toast-'+type;
+  el.innerHTML = '<span>'+msg+'</span>';
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 4500);
+}
+function logout() { sessionStorage.removeItem(SESSION_KEY); window.location.href='login.html'; }
+function resetData() {
+  if (!confirm('Удалить ВСЕ данные из браузера? Данные на GitHub останутся.')) return;
+  localStorage.removeItem(DATA_KEY); localStorage.removeItem(GH_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
+  window.location.reload();
+}
+
+// Close overlays
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+loadState();
+renderAll();
+refreshExports();
+</script>
+</body>
+</html>
