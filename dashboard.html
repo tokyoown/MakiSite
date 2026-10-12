@@ -483,11 +483,11 @@
       <div class="card">
         <div class="card-header"><div class="card-title">Параметры файла version.json</div></div>
         <div class="card-body">
-          <div class="version-badge">Текущая версия лаунчера: <span id="ver-current-label">1.0.2</span></div>
+          <div class="version-badge">Текущая версия лаунчера: <span id="ver-current-label">1.0.4</span></div>
           <div class="form-grid">
             <div class="form-group">
-              <label>Номер версии (например, 1.0.2)</label>
-              <input type="text" id="ver-num" placeholder="1.0.2" />
+              <label>Номер версии (например, 1.0.4)</label>
+              <input type="text" id="ver-num" placeholder="1.0.4" />
             </div>
             <div class="form-group">
               <label>Дата публикации</label>
@@ -636,6 +636,7 @@
     </div>
     <div class="modal-body">
       <input type="hidden" id="mp-edit-idx" value="-1" />
+      <input type="hidden" id="mp-banner-data" value="" />
       <div class="form-grid">
         <div class="form-group">
           <label>ID сборки (латиница)</label>
@@ -682,6 +683,28 @@
         <div class="form-group full">
           <label>Прямая ссылка для скачивания (Google Диск, Яндекс.Диск или прямая)</label>
           <input type="url" id="mp-url" placeholder="https://drive.google.com/..." />
+        </div>
+        <div class="form-group full">
+          <label>Картинка сборки в лаунчере (загрузите с ПК или вставьте ссылку)</label>
+          <input type="file" id="mp-banner-file" accept="image/*" style="display:none" onchange="onBannerFileSelected(event)" />
+          <div class="banner-dropzone" id="mp-banner-dropzone" onclick="triggerBannerUpload(event)" ondragover="onBannerDragOver(event)" ondragleave="onBannerDragLeave(event)" ondrop="onBannerDrop(event)">
+            <div class="banner-empty-state" id="mp-banner-empty">
+              <svg class="drop-icon" viewBox="0 0 24 24"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86l-3 3.87L9 13.14 6 17h12l-3.86-5.14z"/></svg>
+              <div>Нажмите, чтобы выбрать картинку с ПК, или перетащите файл сюда</div>
+              <div class="sub">PNG, JPG, WEBP • Автоматически синхронизируется с карточкой сборки в лаунчере</div>
+            </div>
+            <div class="banner-preview-wrap" id="mp-banner-preview-wrap" style="display:none">
+              <img id="mp-banner-preview-img" src="" alt="Preview" />
+              <div class="banner-preview-overlay">
+                <span class="banner-info-badge" id="mp-banner-status">✓ Картинка готова для лаунчера</span>
+                <div style="display:flex;gap:6px">
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="triggerBannerUpload(event, true)">Заменить</button>
+                  <button type="button" class="btn btn-danger btn-sm" onclick="clearBannerImage(event)">Сбросить</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <input type="text" id="mp-banner-url" placeholder="Или вставьте прямую ссылку на картинку (https://...)" style="margin-top:8px" oninput="onBannerUrlInput(this.value)" />
         </div>
         <div class="form-group full">
           <label>Описание сборки</label>
@@ -756,7 +779,7 @@ sessionStorage.setItem(SESSION_KEY, 'true');
 let S = {
   modpacks: [],
   news: [],
-  version: { Version:'1.0.2', ReleaseNotes:'Обновлены сборки', DownloadUrl:'https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe', SetupUrl:'https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe', Mandatory:false, PubDate:'12.10.2026' },
+  version: { Version:'1.0.4', ReleaseNotes:'Обновление MakiLauncher 1.0.4: настраиваемые обложки сборок через сайт, новая иконка лаунчера и синхронизация игровых миров.', DownloadUrl:'https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe', SetupUrl:'https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe', Mandatory:false, PubDate:'13.10.2026' },
   github: { user:'tokyoown', repo:'MakiSite', token:'' }
 };
 
@@ -771,7 +794,12 @@ function loadState() {
         hasLocalSavedData = true;
       }
       if (p && Array.isArray(p.news)) S.news = p.news;
-      if (p && p.version) S.version = p.version;
+      if (p && p.version) {
+        S.version = p.version;
+        if (!S.version.Version || S.version.Version === '1.0.0' || S.version.Version === '1.0.1' || S.version.Version === '1.0.2' || S.version.Version === '1.0.3') {
+          S.version.Version = '1.0.4';
+        }
+      }
     }
   } catch(e) {}
 
@@ -797,7 +825,7 @@ function loadState() {
       clientFolder: 'atm10',
       author: 'Tokyo_own',
       sizeMb: 1548,
-      banner: ''
+      banner: 'assets/packs/atm10.jpg'
     }];
 
     fetch('manifest.json?t=' + Date.now())
@@ -833,6 +861,12 @@ function showPage(id, el) {
   if (id === 'version') loadVersionInputs();
 }
 
+function resolvePreviewBanner(b) {
+  if (!b) return 'assets/atm10.jpg';
+  if (b === 'assets/packs/atm10.jpg') return 'assets/atm10.jpg';
+  return b;
+}
+
 function renderAll() {
   document.getElementById('ov-packs').textContent = S.modpacks.length;
   document.getElementById('ov-news').textContent = S.news.length;
@@ -861,7 +895,10 @@ function renderAll() {
   mpTb.innerHTML = S.modpacks.length === 0
     ? '<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:40px">Нет сборок — добавьте первую!</td></tr>'
     : S.modpacks.map((p, i) => `<tr>
-        <td><div class="pack-name">${esc(p.name)}</div><div class="pack-id">${esc(p.id)}</div></td>
+        <td style="display:flex;align-items:center;gap:12px">
+          <img src="${esc(resolvePreviewBanner(p.banner))}" onerror="this.src='assets/atm10.jpg'" style="width:56px;height:32px;object-fit:cover;border-radius:5px;border:1px solid var(--border-color);flex-shrink:0" />
+          <div><div class="pack-name">${esc(p.name)}</div><div class="pack-id">${esc(p.id)}</div></div>
+        </td>
         <td>${esc(p.minecraftVersion)}</td>
         <td>${loaderTag(p.modLoader)}</td>
         <td>${p.sizeMb} МБ</td>
@@ -894,6 +931,123 @@ function loaderTag(l) {
   return `<span class="tag tag-${m[l] || 'vanilla'}">${esc(l)}</span>`;
 }
 
+// ── Banner Upload Helpers ──
+function triggerBannerUpload(e, forceOpen = false) {
+  if (e) e.stopPropagation();
+  const previewVisible = document.getElementById('mp-banner-preview-wrap').style.display !== 'none';
+  if (!previewVisible || forceOpen) {
+    document.getElementById('mp-banner-file').click();
+  }
+}
+
+function setBannerPreviewState(bannerValue, statusLabel) {
+  const dataEl = document.getElementById('mp-banner-data');
+  const urlEl = document.getElementById('mp-banner-url');
+  const emptyEl = document.getElementById('mp-banner-empty');
+  const wrapEl = document.getElementById('mp-banner-preview-wrap');
+  const imgEl = document.getElementById('mp-banner-preview-img');
+  const statEl = document.getElementById('mp-banner-status');
+
+  dataEl.value = bannerValue || '';
+  if (!bannerValue) {
+    urlEl.value = '';
+    emptyEl.style.display = 'block';
+    wrapEl.style.display = 'none';
+    imgEl.src = '';
+    return;
+  }
+
+  if (!bannerValue.startsWith('data:image/')) {
+    urlEl.value = bannerValue;
+  } else {
+    urlEl.value = '';
+  }
+
+  emptyEl.style.display = 'none';
+  wrapEl.style.display = 'block';
+  imgEl.src = resolvePreviewBanner(bannerValue);
+  if (statEl) statEl.textContent = statusLabel || '✓ Картинка готова для лаунчера';
+}
+
+function clearBannerImage(e) {
+  if (e) e.stopPropagation();
+  document.getElementById('mp-banner-file').value = '';
+  setBannerPreviewState('', '');
+}
+
+function onBannerUrlInput(val) {
+  const trimmed = (val || '').trim();
+  if (!trimmed) {
+    setBannerPreviewState('', '');
+  } else {
+    setBannerPreviewState(trimmed, '✓ Ссылка на картинку установлена');
+  }
+}
+
+function onBannerDragOver(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById('mp-banner-dropzone').classList.add('dragover');
+}
+
+function onBannerDragLeave(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById('mp-banner-dropzone').classList.remove('dragover');
+}
+
+function onBannerDrop(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById('mp-banner-dropzone').classList.remove('dragover');
+  if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    processBannerFile(e.dataTransfer.files[0]);
+  }
+}
+
+function onBannerFileSelected(e) {
+  if (e.target && e.target.files && e.target.files.length > 0) {
+    processBannerFile(e.target.files[0]);
+  }
+}
+
+function processBannerFile(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    toast('Выберите файл изображения (PNG, JPG, WEBP)!', 'error');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const img = new Image();
+    img.onload = function() {
+      // Resize & center-crop to 720x270 (2.25x Retina of launcher 320x120 card banner)
+      const targetW = 720;
+      const targetH = 270;
+      const canvas = document.createElement('canvas');
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d');
+
+      const scale = Math.max(targetW / img.width, targetH / img.height);
+      const drawW = img.width * scale;
+      const drawH = img.height * scale;
+      const offsetX = (targetW - drawW) / 2;
+      const offsetY = (targetH - drawH) / 2;
+
+      ctx.fillStyle = '#12131c';
+      ctx.fillRect(0, 0, targetW, targetH);
+      ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+      const kbSize = Math.round((compressedDataUrl.length * 3) / 4 / 1024);
+      setBannerPreviewState(compressedDataUrl, `✓ Загружено с ПК (~${kbSize} КБ)`);
+      toast('Картинка подготовлена! Нажмите "Сохранить сборку" для отправки в лаунчер.', 'success');
+    };
+    img.src = evt.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 // ── Modpacks Modal ──
 function openModal(id) {
   document.getElementById('modal-' + id).classList.add('open');
@@ -916,6 +1070,7 @@ function openAddPackModal() {
   document.getElementById('mp-author').value = 'Tokyo_own';
   document.getElementById('mp-url').value = '';
   document.getElementById('mp-desc').value = '';
+  setBannerPreviewState('', '');
   openModal('modpack');
 }
 
@@ -935,12 +1090,14 @@ function editPack(i) {
   document.getElementById('mp-author').value = p.author || 'Tokyo_own';
   document.getElementById('mp-url').value = p.downloadUrl || '';
   document.getElementById('mp-desc').value = p.description || '';
+  setBannerPreviewState(p.banner || '', p.banner ? '✓ Текущая обложка сборки' : '');
   openModal('modpack');
 }
 
 async function savePack() {
   const idx = parseInt(document.getElementById('mp-edit-idx').value, 10);
   const packId = v('mp-id').trim() || v('mp-name').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  const bannerVal = v('mp-banner-data').trim() || v('mp-banner-url').trim() || 'assets/packs/atm10.jpg';
   const pack = {
     id: packId,
     name: v('mp-name').trim(),
@@ -953,7 +1110,7 @@ async function savePack() {
     clientFolder: v('mp-folder').trim() || packId,
     author: v('mp-author').trim() || 'Tokyo_own',
     sizeMb: parseInt(v('mp-size'), 10) || 0,
-    banner: ''
+    banner: bannerVal
   };
   if (!pack.id || !pack.name || !pack.downloadUrl) {
     toast('Заполните ID, название и ссылку на скачивание!', 'error');
@@ -1039,7 +1196,7 @@ async function deleteNews(i) {
 
 // ── Version ──
 function loadVersionInputs() {
-  document.getElementById('ver-num').value = S.version.Version || '1.0.2';
+  document.getElementById('ver-num').value = S.version.Version || '1.0.4';
   document.getElementById('ver-notes').value = S.version.ReleaseNotes || '';
   document.getElementById('ver-url').value = S.version.SetupUrl || S.version.DownloadUrl || 'https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe';
   document.getElementById('ver-mandatory').checked = S.version.Mandatory || false;
@@ -1055,7 +1212,7 @@ async function saveVersion() {
   if (raw) { const p = raw.split('-'); date = p[2] + '.' + p[1] + '.' + p[0]; }
   const url = document.getElementById('ver-url').value.trim();
   S.version = {
-    Version: v('ver-num') || '1.0.2',
+    Version: v('ver-num') || '1.0.4',
     ReleaseNotes: v('ver-notes'),
     DownloadUrl: url,
     SetupUrl: url,
