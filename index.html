@@ -187,14 +187,15 @@
   .section-desc { font-size: 16px; color: var(--text-muted); }
 
   .packs-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-    gap: 28px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 24px;
   }
   .pack-card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    overflow: hidden;
+    padding: 26px;
+    display: flex; flex-direction: column; justify-content: space-between;
     transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
   }
   .pack-card:hover {
@@ -202,22 +203,24 @@
     border-color: var(--border-highlight);
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), 0 0 20px rgba(254, 94, 16, 0.15);
   }
-  .pack-banner {
-    width: 100%; height: 180px; object-fit: cover; display: block;
-    background: #1c1d29;
-  }
-  .pack-body { padding: 22px; }
-  .pack-badges { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .pack-body { padding: 0; }
+  .pack-badges { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; }
   .badge-mc {
     background: rgba(229, 57, 53, 0.2); border: 1px solid rgba(229, 57, 53, 0.4);
-    color: #ff8a80; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;
+    color: #ff8a80; padding: 3px 10px; border-radius: 4px; font-size: 11.5px; font-weight: 700;
   }
   .badge-loader {
     background: rgba(254, 94, 16, 0.2); border: 1px solid rgba(254, 94, 16, 0.4);
-    color: #ffab91; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;
+    color: #ffab91; padding: 3px 10px; border-radius: 4px; font-size: 11.5px; font-weight: 700;
   }
-  .pack-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
-  .pack-desc { font-size: 13.5px; color: var(--text-muted); line-height: 1.55; margin-bottom: 18px; }
+  .pack-title { font-size: 21px; font-weight: 800; margin-bottom: 8px; color: var(--text-white); }
+  .pack-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 18px; }
+  .pack-meta-row {
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: var(--text-dim);
+    padding-top: 14px; border-top: 1px solid var(--border-color);
+    margin-top: auto;
+  }
   .pack-meta-row {
     display: flex; justify-content: space-between; align-items: center;
     padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06);
@@ -320,13 +323,13 @@
       <div>
         <div class="hero-tag">
           <span class="hero-tag-dot"></span>
-          Версия 1.0.0 онлайн • Windows 64-bit
+          <span id="hero-version-badge">ВЕРСИЯ v1.0.2 ОНЛАЙН • WINDOWS 64-BIT</span>
         </div>
         <h1 class="hero-title">
-          Быстрый лаунчер Minecraft <span>без лишних действий</span>
+          Персональный лаунчер с <span>кастомными сборками</span>
         </h1>
         <p class="hero-desc">
-          Официальный лаунчер с предустановленными авторскими сборками, автоматической синхронизацией из облака и правильным отображением скинов на сервере.
+          Персональный лаунчер с возможностью быстро скачивать кастомные сборки, настраивать 3-D скины и играть без лишних настроек.
         </p>
 
         <div class="hero-actions">
@@ -334,25 +337,6 @@
             <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
             Скачать MakiLauncher (Setup)
           </a>
-          <a class="btn-secondary" href="manifest.json" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-            Манифест version.json
-          </a>
-        </div>
-
-        <div class="hero-meta">
-          <div>
-            <div class="meta-stat-num">1.21.1</div>
-            <div class="meta-stat-label">Minecraft NeoForge</div>
-          </div>
-          <div>
-            <div class="meta-stat-num">1 Клик</div>
-            <div class="meta-stat-label">Авто-установка</div>
-          </div>
-          <div>
-            <div class="meta-stat-num">100%</div>
-            <div class="meta-stat-label">Без рекламы</div>
-          </div>
         </div>
       </div>
 
@@ -369,7 +353,7 @@
   </div>
 </section>
 
-<!-- Modpacks Showcase -->
+<!-- Modpacks Showcase (Loaded dynamically from dashboard) -->
 <section class="section" id="packs">
   <div class="container">
     <div class="section-header">
@@ -378,43 +362,9 @@
       <p class="section-desc">Каждая сборка оптимизирована и автоматически распаковывается в изолированный клиент.</p>
     </div>
 
-    <div class="packs-grid">
-      <!-- ATM10 Modpack Card -->
-      <div class="pack-card">
-        <img class="pack-banner" src="assets/atm10.jpg" alt="All The Mods 10 Banner">
-        <div class="pack-body">
-          <div class="pack-badges">
-            <span class="badge-mc">Minecraft 1.21.1</span>
-            <span class="badge-loader">NeoForge</span>
-          </div>
-          <h3 class="pack-title">All The Mods 10 (ATM10)</h3>
-          <p class="pack-desc">
-            Флагманская сборка: технологии, магия, новые измерения, шейдеры и сотни квестов. Подготовлена для сетевой игры с друзьями.
-          </p>
-          <div class="pack-meta-row">
-            <span>Папка: clients/atm10</span>
-            <span>Память: от 6144 MB RAM</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Custom Pack Card -->
-      <div class="pack-card">
-        <img class="pack-banner" src="assets/bg.jpg" alt="Custom Pack Banner">
-        <div class="pack-body">
-          <div class="pack-badges">
-            <span class="badge-mc">Minecraft 1.20.1</span>
-            <span class="badge-loader">Forge</span>
-          </div>
-          <h3 class="pack-title">Vanilla+ Community Edition</h3>
-          <p class="pack-desc">
-            Легковесная оптимизированная сборка с улучшенной графикой, поддержкой шейдеров Iris/Oculus и плавной работой на любых ПК.
-          </p>
-          <div class="pack-meta-row">
-            <span>Папка: clients/vanilla_plus</span>
-            <span>Память: от 3072 MB RAM</span>
-          </div>
-        </div>
+    <div class="packs-grid" id="packs-container">
+      <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">
+        Загрузка сборок из панели управления...
       </div>
     </div>
   </div>
@@ -435,7 +385,7 @@
           <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
         </div>
         <h3 class="feature-title">Облачная синхронизация</h3>
-        <p class="feature-text">При выходе обновления сборки лаунчер сразу видит манифест и обновляет файлы в один клик без повторной ручной настройки.</p>
+        <p class="feature-text">При выходе обновления сборки лаунчер сразу синхронизирует и обновляет файлы в один клик без повторной ручной настройки.</p>
       </div>
 
       <div class="feature-box">
@@ -513,10 +463,115 @@
   <div>MakiLauncher • Официальный дистрибутив Minecraft</div>
   <div style="margin-top: 10px;">
     <a href="https://github.com/tokyoown/MakiSite" target="_blank">GitHub Репозиторий</a>
-    <a href="manifest.json" target="_blank">Манифест версий</a>
     <a href="dashboard.html">Панель администратора</a>
   </div>
 </footer>
 
+<script>
+function esc(s) { return s ? String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''; }
+
+// 1. Dynamic GitHub Release Version
+async function fetchLatestGitHubVersion() {
+  const badge = document.getElementById('hero-version-badge');
+  try {
+    const res = await fetch('https://api.github.com/repos/tokyoown/MakiSite/releases/latest');
+    if (res.ok) {
+      const data = await res.json();
+      const ver = (data.tag_name || data.name || 'v1.0.2').replace(/^v/i, '');
+      if (badge) badge.textContent = `ВЕРСИЯ ${ver} ОНЛАЙН • WINDOWS 64-BIT`;
+
+      // If release asset has a direct download URL, update all setup download buttons
+      if (data.assets && data.assets.length > 0) {
+        const setupAsset = data.assets.find(a => a.name.toLowerCase().endsWith('.exe'));
+        if (setupAsset && setupAsset.browser_download_url) {
+          document.querySelectorAll('a[href*="MakiLauncher-Setup.exe"]').forEach(el => {
+            el.href = setupAsset.browser_download_url;
+          });
+        }
+      }
+    } else {
+      // Fallback to version.json
+      fetch('version.json')
+        .then(r => r.json())
+        .then(vData => {
+          if (vData && vData.Version && badge) {
+            badge.textContent = `ВЕРСИЯ ${vData.Version.replace(/^v/i, '')} ОНЛАЙН • WINDOWS 64-BIT`;
+          }
+        }).catch(() => {});
+    }
+  } catch(e) {
+    // If offline/error, keep clean v1.0.2
+    if (badge) badge.textContent = 'ВЕРСИЯ 1.0.2 ОНЛАЙН • WINDOWS 64-BIT';
+  }
+}
+
+// 2. Dynamic Modpacks from Dashboard (localStorage or manifest.json)
+async function loadDashboardPacks() {
+  const container = document.getElementById('packs-container');
+  let packs = [];
+
+  // Try dashboard localStorage first
+  try {
+    const raw = localStorage.getItem('makilauncher_web_data');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.modpacks && parsed.modpacks.length > 0) {
+        packs = parsed.modpacks;
+      }
+    }
+  } catch(e) {}
+
+  // If empty, fetch live manifest.json
+  if (!packs || packs.length === 0) {
+    try {
+      const res = await fetch('manifest.json');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.modpacks && data.modpacks.length > 0) {
+          packs = data.modpacks;
+        }
+      }
+    } catch(e) {}
+  }
+
+  // Fallback default
+  if (!packs || packs.length === 0) {
+    packs = [{
+      id: 'atm10',
+      name: 'All The Mods 10 (ATM10)',
+      version: '1.0.0',
+      minecraftVersion: '1.21.1',
+      modLoader: 'NeoForge',
+      clientFolder: 'atm10',
+      sizeMb: 1548,
+      description: 'Флагманская сборка: технологии, магия, новые измерения, шейдеры и сотни квестов. Подготовлена для сетевой игры с друзьями.'
+    }];
+  }
+
+  // Render without pictures
+  if (container) {
+    container.innerHTML = packs.map(p => `
+      <div class="pack-card">
+        <div class="pack-body">
+          <div class="pack-badges">
+            <span class="badge-mc">Minecraft ${esc(p.minecraftVersion || '1.21.1')}</span>
+            <span class="badge-loader">${esc(p.modLoader || 'NeoForge')}</span>
+          </div>
+          <h3 class="pack-title">${esc(p.name)}</h3>
+          <p class="pack-desc">${esc(p.description || 'Авторская сборка с модами.')}</p>
+        </div>
+        <div class="pack-meta-row">
+          <span>Папка: <code>clients/${esc(p.clientFolder || p.id)}</code></span>
+          <span>Размер: ~${p.sizeMb || 0} МБ</span>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+// Init
+fetchLatestGitHubVersion();
+loadDashboardPacks();
+</script>
 </body>
 </html>
