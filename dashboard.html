@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MakiLauncher — Панель управления</title>
+<link rel="icon" type="image/png" href="assets/icon.png">
+<link rel="shortcut icon" href="favicon.ico">
 <style>
   :root {
     --bg-main: #0a0b10;
@@ -45,12 +47,11 @@
     font-size: 17px; font-weight: 800; text-decoration: none; color: var(--text-white);
   }
   .header-logo-icon {
-    width: 32px; height: 32px; border-radius: 6px;
-    background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+    width: 34px; height: 34px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 14px rgba(254, 94, 16, 0.4);
+    filter: drop-shadow(0 0 10px rgba(254, 94, 16, 0.4));
   }
-  .header-logo-icon svg { width: 16px; height: 16px; fill: #ffffff; }
+  .header-logo-icon img { width: 100%; height: 100%; object-fit: contain; display: block; }
   .header-logo span { color: var(--accent-orange); }
   .header-right { display: flex; align-items: center; gap: 12px; }
   .header-user {
@@ -325,7 +326,7 @@
 <header>
   <a class="header-logo" href="index.html">
     <div class="header-logo-icon">
-      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
+      <img src="assets/icon.png" alt="MakiLauncher">
     </div>
     Maki<span>Launcher</span> Панель
   </a>
@@ -424,11 +425,11 @@
       <div class="card">
         <div class="card-header">
           <div class="card-title">Активные сборки</div>
-          <button class="btn btn-primary btn-sm" onclick="openModal('modpack')">Добавить сборку</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddPackModal()">Добавить сборку</button>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Сборка</th><th>Minecraft</th><th>Загрузчик</th><th>Размер</th><th>Статус</th></tr></thead>
+            <thead><tr><th>Сборка</th><th>Minecraft</th><th>Ядро</th><th>Размер</th><th>Статус</th></tr></thead>
             <tbody id="ov-table"></tbody>
           </table>
         </div>
@@ -439,16 +440,19 @@
     <div class="page" id="page-modpacks">
       <div class="page-header">
         <div class="page-title">Управление сборками</div>
-        <div class="page-sub">Добавление, редактирование параметров и прямых ссылок на архивы</div>
+        <div class="page-sub">Добавление, редактирование параметров и прямых ссылок на архивы (автоматическая синхронизация с лаунчером)</div>
       </div>
       <div class="card">
         <div class="card-header">
           <div class="card-title">Все сборки (<span id="mp-count">0</span>)</div>
-          <button class="btn btn-primary" onclick="openModal('modpack')">Добавить сборку</button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-secondary" onclick="publishFile('manifest.json')">Синхронизировать с лаунчером</button>
+            <button class="btn btn-primary" onclick="openAddPackModal()">Добавить сборку</button>
+          </div>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Сборка</th><th>Minecraft</th><th>Загрузчик</th><th>Размер</th><th>Папка клиента</th><th>Действия</th></tr></thead>
+            <thead><tr><th>Сборка</th><th>Minecraft</th><th>Ядро</th><th>Размер</th><th>Папка клиента</th><th>Действия</th></tr></thead>
             <tbody id="mp-table"></tbody>
           </table>
         </div>
@@ -650,17 +654,17 @@
           <input type="text" id="mp-mcver" placeholder="1.21.1" />
         </div>
         <div class="form-group">
-          <label>Загрузчик модов</label>
+          <label>Ядро</label>
           <select id="mp-loader">
-            <option>NeoForge</option>
-            <option>Forge</option>
-            <option>Fabric</option>
-            <option>Quilt</option>
-            <option>Vanilla</option>
+            <option value="NeoForge">NeoForge</option>
+            <option value="Forge">Forge</option>
+            <option value="Fabric">Fabric</option>
+            <option value="Quilt">Quilt</option>
+            <option value="Vanilla">Vanilla</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Версия загрузчика</label>
+          <label>Версия ядра</label>
           <input type="text" id="mp-loader-ver" placeholder="21.1.x" />
         </div>
         <div class="form-group">
@@ -671,39 +675,9 @@
           <label>Примерный размер (МБ)</label>
           <input type="number" id="mp-size" placeholder="1548" />
         </div>
-        <div class="form-group">
+        <div class="form-group full">
           <label>Автор сборки</label>
           <input type="text" id="mp-author" placeholder="Tokyo_own" />
-        </div>
-        <div class="form-group full">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <label style="margin:0;">Обложка / Баннер сборки</label>
-            <label class="btn btn-primary btn-sm" style="cursor:pointer; margin:0; padding:4px 12px; font-size:12px;">
-              <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-              Загрузить картинку
-              <input type="file" id="mp-file-input" accept="image/*" style="display:none;" onchange="handleBannerFileUpload(this)" />
-            </label>
-          </div>
-          
-          <input type="text" id="mp-banner" placeholder="assets/packs/atm10.jpg, прямая ссылка или загрузите файл выше..." oninput="updateBannerPreview()" style="margin-bottom:8px;" />
-
-          <div id="mp-banner-dropzone" class="banner-dropzone" onclick="document.getElementById('mp-file-input').click()" ondragover="handleBannerDragOver(event)" ondragleave="handleBannerDragLeave(event)" ondrop="handleBannerDrop(event)">
-            <div id="mp-banner-empty" class="banner-empty-state">
-              <svg viewBox="0 0 24 24" class="drop-icon"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-              <div style="font-weight:600;">Нажмите сюда или перетащите картинку (PNG, JPG, WebP)</div>
-              <div class="sub">Картинка автоматически оптимизируется под баннер карточки сборки</div>
-            </div>
-            <div id="mp-banner-preview-wrap" class="banner-preview-wrap" style="display:none;">
-              <img id="mp-banner-preview-img" src="" alt="Обложка сборки" />
-              <div class="banner-preview-overlay">
-                <span id="mp-banner-info-badge" class="banner-info-badge">Готово к сохранению</span>
-                <div style="display:flex; gap:6px;">
-                  <button type="button" id="btn-gh-upload-banner" class="btn btn-secondary btn-sm" style="display:none;" onclick="event.stopPropagation(); uploadBannerToGitHub();">Выгрузить на GitHub</button>
-                  <button type="button" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); clearBannerImage();">Удалить обложку</button>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
         <div class="form-group full">
           <label>Прямая ссылка для скачивания (Google Диск, Яндекс.Диск или прямая)</label>
@@ -782,18 +756,22 @@ sessionStorage.setItem(SESSION_KEY, 'true');
 let S = {
   modpacks: [],
   news: [],
-  version: { Version:'1.0.2', ReleaseNotes:'Обновлены сборки и манифест', DownloadUrl:'https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe', SetupUrl:'https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe', Mandatory:false, PubDate:'12.10.2026' },
+  version: { Version:'1.0.2', ReleaseNotes:'Обновлены сборки', DownloadUrl:'https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe', SetupUrl:'https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe', Mandatory:false, PubDate:'12.10.2026' },
   github: { user:'tokyoown', repo:'MakiSite', token:'' }
 };
 
 function loadState() {
+  let hasLocalSavedData = false;
   try {
     const d = localStorage.getItem(DATA_KEY);
     if (d) {
       const p = JSON.parse(d);
-      S.modpacks = p.modpacks || [];
-      S.news = p.news || [];
-      if (p.version) S.version = p.version;
+      if (p && Array.isArray(p.modpacks)) {
+        S.modpacks = p.modpacks;
+        hasLocalSavedData = true;
+      }
+      if (p && Array.isArray(p.news)) S.news = p.news;
+      if (p && p.version) S.version = p.version;
     }
   } catch(e) {}
 
@@ -802,40 +780,48 @@ function loadState() {
     if (g) S.github = Object.assign(S.github, JSON.parse(g));
   } catch(e) {}
 
-  // Defaults if empty
-  if (S.modpacks.length === 0) {
+  loadGHInputs();
+
+  // Only seed from manifest.json or defaults if localStorage has NO saved state yet!
+  // This prevents page reloads from ever resetting edits made in the dashboard.
+  if (!hasLocalSavedData) {
     S.modpacks = [{
       id: 'atm10',
-      name: 'All The Mods 10',
-      version: '1.0.1',
+      name: 'ATM10',
+      version: '1.0.0',
       minecraftVersion: '1.21.1',
       modLoader: 'NeoForge',
       loaderVersion: '21.1.x',
-      description: 'All the Mods 10 — огромный модпак с сотнями модов для Minecraft 1.21.1 NeoForge.',
+      description: 'All the Mods 10 — огромный модпак с сотнями модов для Minecraft 1.21.1.',
       downloadUrl: 'https://drive.google.com/file/d/1Sbf_TcGY7iBIe8Ml5Yg5Zah_SyexG4VS/view?usp=sharing',
       clientFolder: 'atm10',
       author: 'Tokyo_own',
       sizeMb: 1548,
-      banner: 'assets/packs/atm10.jpg'
+      banner: ''
     }];
-  }
 
-  // Also try fetching from live manifest.json
-  fetch('manifest.json')
-    .then(r => r.json())
-    .then(data => {
-      if (data && data.modpacks && data.modpacks.length > 0) {
-        S.modpacks = data.modpacks;
-        if (data.news) S.news = data.news;
-        renderAll();
-        refreshExports();
-      }
-    })
-    .catch(() => {});
+    fetch('manifest.json?t=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        if (!localStorage.getItem(DATA_KEY) && data && Array.isArray(data.modpacks) && data.modpacks.length > 0) {
+          S.modpacks = data.modpacks;
+          if (data.news) S.news = data.news;
+          saveState();
+          renderAll();
+          refreshExports();
+        }
+      })
+      .catch(() => {});
+  }
 }
 
 function saveState() {
-  localStorage.setItem(DATA_KEY, JSON.stringify({ modpacks: S.modpacks, news: S.news, version: S.version }));
+  localStorage.setItem(DATA_KEY, JSON.stringify({
+    modpacks: S.modpacks,
+    news: S.news,
+    version: S.version,
+    updatedAt: Date.now()
+  }));
 }
 
 function showPage(id, el) {
@@ -852,7 +838,7 @@ function renderAll() {
   document.getElementById('ov-news').textContent = S.news.length;
   document.getElementById('ov-ver').textContent = S.version.Version || '—';
   document.getElementById('ov-github').innerHTML = S.github.token
-    ? '<span style="color:var(--green)">Настроен</span>'
+    ? '<span style="color:var(--green)">Настроен (авто-синхронизация)</span>'
     : '<span style="color:var(--text-dim)">Не настроен</span>';
 
   document.getElementById('mp-count').textContent = S.modpacks.length;
@@ -911,20 +897,33 @@ function loaderTag(l) {
 // ── Modpacks Modal ──
 function openModal(id) {
   document.getElementById('modal-' + id).classList.add('open');
-  if (id === 'modpack') {
-    if (document.getElementById('mp-edit-idx').value === '-1') {
-      clearBannerImage();
-    } else {
-      updateBannerPreview();
-    }
-  }
 }
-function closeModal(id) { document.getElementById('modal-' + id).classList.remove('open'); }
+function closeModal(id) {
+  document.getElementById('modal-' + id).classList.remove('open');
+}
+
+function openAddPackModal() {
+  document.getElementById('mp-modal-title').textContent = 'Добавить сборку';
+  document.getElementById('mp-edit-idx').value = '-1';
+  document.getElementById('mp-id').value = '';
+  document.getElementById('mp-name').value = '';
+  document.getElementById('mp-ver').value = '1.0.0';
+  document.getElementById('mp-mcver').value = '1.21.1';
+  document.getElementById('mp-loader').value = 'NeoForge';
+  document.getElementById('mp-loader-ver').value = '';
+  document.getElementById('mp-folder').value = '';
+  document.getElementById('mp-size').value = '1500';
+  document.getElementById('mp-author').value = 'Tokyo_own';
+  document.getElementById('mp-url').value = '';
+  document.getElementById('mp-desc').value = '';
+  openModal('modpack');
+}
 
 function editPack(i) {
   const p = S.modpacks[i];
+  if (!p) return;
   document.getElementById('mp-modal-title').textContent = 'Редактировать сборку';
-  document.getElementById('mp-edit-idx').value = i;
+  document.getElementById('mp-edit-idx').value = String(i);
   document.getElementById('mp-id').value = p.id || '';
   document.getElementById('mp-name').value = p.name || '';
   document.getElementById('mp-ver').value = p.version || '1.0.0';
@@ -933,209 +932,62 @@ function editPack(i) {
   document.getElementById('mp-loader-ver').value = p.loaderVersion || '';
   document.getElementById('mp-folder').value = p.clientFolder || '';
   document.getElementById('mp-size').value = p.sizeMb || 0;
-  document.getElementById('mp-author').value = p.author || '';
-  document.getElementById('mp-banner').value = p.banner || '';
+  document.getElementById('mp-author').value = p.author || 'Tokyo_own';
   document.getElementById('mp-url').value = p.downloadUrl || '';
   document.getElementById('mp-desc').value = p.description || '';
-  updateBannerPreview();
   openModal('modpack');
 }
 
-function handleBannerDragOver(e) {
-  e.preventDefault();
-  const dz = document.getElementById('mp-banner-dropzone');
-  if (dz) dz.classList.add('dragover');
-}
-
-function handleBannerDragLeave(e) {
-  e.preventDefault();
-  const dz = document.getElementById('mp-banner-dropzone');
-  if (dz) dz.classList.remove('dragover');
-}
-
-function handleBannerDrop(e) {
-  e.preventDefault();
-  const dz = document.getElementById('mp-banner-dropzone');
-  if (dz) dz.classList.remove('dragover');
-  if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
-    processImageFile(e.dataTransfer.files[0]);
-  }
-}
-
-function handleBannerFileUpload(input) {
-  if (input.files && input.files[0]) {
-    processImageFile(input.files[0]);
-    input.value = '';
-  }
-}
-
-function processImageFile(file) {
-  if (!file.type || !file.type.startsWith('image/')) {
-    toast('Пожалуйста, выберите файл изображения (PNG, JPG, WebP)!', 'error');
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const img = new Image();
-    img.onload = function() {
-      // Scale down image to optimal banner size (max width 960px)
-      const maxW = 960;
-      let w = img.width;
-      let h = img.height;
-      if (w > maxW) {
-        h = Math.round((h * maxW) / w);
-        w = maxW;
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-
-      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.86);
-
-      const bannerInput = document.getElementById('mp-banner');
-      bannerInput.value = compressedDataUrl;
-
-      updateBannerPreview();
-      toast('Картинка успешно загружена (' + w + 'x' + h + ' px)', 'success');
-    };
-    img.onerror = function() {
-      toast('Не удалось прочитать изображение', 'error');
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-function updateBannerPreview() {
-  const val = (document.getElementById('mp-banner') || {}).value || '';
-  const emptyEl = document.getElementById('mp-banner-empty');
-  const wrapEl = document.getElementById('mp-banner-preview-wrap');
-  const imgEl = document.getElementById('mp-banner-preview-img');
-  const badgeEl = document.getElementById('mp-banner-info-badge');
-  const ghBtn = document.getElementById('btn-gh-upload-banner');
-
-  if (!emptyEl || !wrapEl || !imgEl) return;
-
-  if (val.trim()) {
-    emptyEl.style.display = 'none';
-    wrapEl.style.display = 'block';
-    imgEl.src = val.trim();
-    if (val.startsWith('data:image/')) {
-      if (badgeEl) badgeEl.textContent = 'Встроено (Base64)';
-      if (ghBtn && S.github && S.github.token) ghBtn.style.display = 'inline-flex';
-    } else {
-      if (badgeEl) badgeEl.textContent = val.length > 25 ? val.substring(0, 22) + '...' : val;
-      if (ghBtn) ghBtn.style.display = 'none';
-    }
-  } else {
-    emptyEl.style.display = 'block';
-    wrapEl.style.display = 'none';
-    imgEl.src = '';
-    if (ghBtn) ghBtn.style.display = 'none';
-  }
-}
-
-function clearBannerImage() {
-  const inp = document.getElementById('mp-banner');
-  if (inp) inp.value = '';
-  updateBannerPreview();
-}
-
-async function uploadBannerToGitHub() {
-  const bannerInput = document.getElementById('mp-banner');
-  const packId = (document.getElementById('mp-id').value || 'pack').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'pack';
-  if (!bannerInput.value.startsWith('data:image/')) {
-    toast('Изображение уже указано ссылкой или путем', 'info');
-    return;
-  }
-  const { user, repo, token } = S.github;
-  if (!user || !repo || !token) {
-    toast('Для отправки на GitHub укажите токен во вкладке "Публикация"!', 'error');
-    return;
-  }
-
-  const base64Data = bannerInput.value.split(',')[1];
-  const targetFilename = 'assets/packs/' + packId + '.jpg';
-
-  toast('Загрузка обложки на GitHub: ' + targetFilename + '...', 'info');
-  try {
-    let sha = null;
-    const check = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${targetFilename}`, {
-      headers: { Authorization: 'token ' + token }
-    });
-    if (check.ok) sha = (await check.json()).sha;
-
-    const body = {
-      message: 'Upload pack banner: ' + targetFilename,
-      content: base64Data
-    };
-    if (sha) body.sha = sha;
-
-    const putRes = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${targetFilename}`, {
-      method: 'PUT',
-      headers: { Authorization: 'token ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    if (putRes.ok) {
-      bannerInput.value = targetFilename;
-      updateBannerPreview();
-      toast('Обложка сохранена в репозиторий: ' + targetFilename, 'success');
-    } else {
-      const errData = await putRes.json();
-      toast('Ошибка отправки: ' + (errData.message || 'HTTP ' + putRes.status), 'error');
-    }
-  } catch(e) {
-    toast('Ошибка соединения: ' + e.message, 'error');
-  }
-}
-
-function savePack() {
-  const idx = parseInt(document.getElementById('mp-edit-idx').value);
+async function savePack() {
+  const idx = parseInt(document.getElementById('mp-edit-idx').value, 10);
+  const packId = v('mp-id').trim() || v('mp-name').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
   const pack = {
-    id: v('mp-id'),
-    name: v('mp-name'),
-    version: v('mp-ver') || '1.0.0',
-    minecraftVersion: v('mp-mcver'),
-    modLoader: v('mp-loader'),
-    loaderVersion: v('mp-loader-ver'),
-    description: v('mp-desc'),
-    downloadUrl: v('mp-url'),
-    clientFolder: v('mp-folder'),
-    author: v('mp-author'),
-    sizeMb: parseInt(v('mp-size')) || 0,
-    banner: v('mp-banner')
+    id: packId,
+    name: v('mp-name').trim(),
+    version: v('mp-ver').trim() || '1.0.0',
+    minecraftVersion: v('mp-mcver').trim() || '1.21.1',
+    modLoader: v('mp-loader') || 'NeoForge',
+    loaderVersion: v('mp-loader-ver').trim(),
+    description: v('mp-desc').trim(),
+    downloadUrl: v('mp-url').trim(),
+    clientFolder: v('mp-folder').trim() || packId,
+    author: v('mp-author').trim() || 'Tokyo_own',
+    sizeMb: parseInt(v('mp-size'), 10) || 0,
+    banner: ''
   };
   if (!pack.id || !pack.name || !pack.downloadUrl) {
     toast('Заполните ID, название и ссылку на скачивание!', 'error');
     return;
   }
-  if (idx === -1) {
+  if (isNaN(idx) || idx < 0 || idx >= S.modpacks.length) {
     S.modpacks.push(pack);
     toast('Сборка добавлена: ' + pack.name, 'success');
   } else {
     S.modpacks[idx] = pack;
-    toast('Сборка обновлена', 'success');
+    toast('Сборка сохранена: ' + pack.name, 'success');
   }
   saveState();
   renderAll();
   refreshExports();
   closeModal('modpack');
   document.getElementById('mp-edit-idx').value = '-1';
-  document.getElementById('mp-modal-title').textContent = 'Добавить сборку';
-  clearBannerImage();
+
+  // Auto-sync with GitHub & Launcher if token is configured
+  if (S.github && S.github.token) {
+    await publishFile('manifest.json', true);
+  }
 }
 
-function deletePack(i) {
+async function deletePack(i) {
   if (!confirm('Удалить сборку "' + S.modpacks[i].name + '"?')) return;
   S.modpacks.splice(i, 1);
   saveState();
   renderAll();
   refreshExports();
   toast('Сборка удалена', 'info');
+  if (S.github && S.github.token) {
+    await publishFile('manifest.json', true);
+  }
 }
 
 // ── News Modal ──
@@ -1149,14 +1001,14 @@ function editNews(i) {
   openModal('news');
 }
 
-function saveNews() {
-  const idx = parseInt(document.getElementById('news-edit-idx').value);
+async function saveNews() {
+  const idx = parseInt(document.getElementById('news-edit-idx').value, 10);
   const item = { title: v('n-title'), text: v('n-text'), date: v('n-date') };
   if (!item.title || !item.text) {
     toast('Заполните заголовок и текст!', 'error');
     return;
   }
-  if (idx === -1) {
+  if (isNaN(idx) || idx === -1) {
     S.news.push(item);
     toast('Новость добавлена', 'success');
   } else {
@@ -1168,15 +1020,21 @@ function saveNews() {
   refreshExports();
   closeModal('news');
   document.getElementById('news-edit-idx').value = '-1';
+  if (S.github && S.github.token) {
+    await publishFile('manifest.json', true);
+  }
 }
 
-function deleteNews(i) {
+async function deleteNews(i) {
   if (!confirm('Удалить новость?')) return;
   S.news.splice(i, 1);
   saveState();
   renderAll();
   refreshExports();
   toast('Новость удалена', 'info');
+  if (S.github && S.github.token) {
+    await publishFile('manifest.json', true);
+  }
 }
 
 // ── Version ──
@@ -1191,7 +1049,7 @@ function loadVersionInputs() {
   }
 }
 
-function saveVersion() {
+async function saveVersion() {
   const raw = document.getElementById('ver-date').value;
   let date = raw;
   if (raw) { const p = raw.split('-'); date = p[2] + '.' + p[1] + '.' + p[0]; }
@@ -1209,6 +1067,9 @@ function saveVersion() {
   renderAll();
   refreshExports();
   toast('Параметры версии сохранены', 'success');
+  if (S.github && S.github.token) {
+    await publishFile('version.json', true);
+  }
 }
 
 // ── JSON ──
@@ -1269,15 +1130,21 @@ async function fetchLiveDownloads() {
 
 // ── GitHub Publishing ──
 function loadGHInputs() {
-  document.getElementById('gh-user').value = S.github.user || 'tokyoown';
-  document.getElementById('gh-repo').value = S.github.repo || 'MakiSite';
-  document.getElementById('gh-token').value = S.github.token || '';
+  const uEl = document.getElementById('gh-user');
+  const rEl = document.getElementById('gh-repo');
+  const tEl = document.getElementById('gh-token');
+  if (uEl) uEl.value = S.github.user || 'tokyoown';
+  if (rEl) rEl.value = S.github.repo || 'MakiSite';
+  if (tEl) tEl.value = S.github.token || '';
 }
 
 function saveGH() {
-  S.github.user = document.getElementById('gh-user').value.trim();
-  S.github.repo = document.getElementById('gh-repo').value.trim();
-  S.github.token = document.getElementById('gh-token').value.trim();
+  const uVal = (document.getElementById('gh-user') || {}).value;
+  const rVal = (document.getElementById('gh-repo') || {}).value;
+  const tVal = (document.getElementById('gh-token') || {}).value;
+  if (uVal !== undefined) S.github.user = uVal.trim() || 'tokyoown';
+  if (rVal !== undefined) S.github.repo = rVal.trim() || 'MakiSite';
+  if (tVal !== undefined && tVal.trim() !== '') S.github.token = tVal.trim();
   localStorage.setItem(GH_KEY, JSON.stringify(S.github));
   renderAll();
   toast('Настройки GitHub сохранены', 'success');
@@ -1296,23 +1163,32 @@ async function testGH() {
   }
 }
 
-async function publishFile(filename) {
-  saveGH();
+async function publishFile(filename, isAutoSync = false) {
+  const uInput = (document.getElementById('gh-user') || {}).value;
+  const rInput = (document.getElementById('gh-repo') || {}).value;
+  const tInput = (document.getElementById('gh-token') || {}).value;
+  if (uInput && uInput.trim()) S.github.user = uInput.trim();
+  if (rInput && rInput.trim()) S.github.repo = rInput.trim();
+  if (tInput && tInput.trim()) S.github.token = tInput.trim();
+  localStorage.setItem(GH_KEY, JSON.stringify(S.github));
+
   const { user, repo, token } = S.github;
   if (!user || !repo || !token) {
-    toast('Укажите GitHub Username, Repo и Token во вкладке "Публикация"!', 'error');
+    if (!isAutoSync) {
+      toast('Укажите GitHub Token во вкладке "Публикация на GitHub" для синхронизации с лаунчером!', 'error');
+    }
     return;
   }
   const content = filename === 'manifest.json' ? buildManifest() : buildVersion();
   try {
     let sha = null;
-    const gr = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${filename}`, {
+    const gr = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${filename}?t=${Date.now()}`, {
       headers: { Authorization: 'token ' + token }
     });
     if (gr.ok) sha = (await gr.json()).sha;
 
     const body = {
-      message: 'Dashboard update: ' + filename,
+      message: 'Dashboard sync: ' + filename,
       content: btoa(unescape(encodeURIComponent(content)))
     };
     if (sha) body.sha = sha;
@@ -1324,13 +1200,13 @@ async function publishFile(filename) {
     });
 
     if (pr.ok) {
-      toast(filename + ' успешно опубликован в репозиторий!', 'success');
+      toast('Синхронизировано с GitHub и лаунчером (' + filename + ')!', 'success');
     } else {
       const e = await pr.json();
       toast(filename + ': ' + (e.message || 'ошибка отправки'), 'error');
     }
   } catch (e) {
-    toast('Ошибка публикации: ' + e.message, 'error');
+    toast('Ошибка синхронизации: ' + e.message, 'error');
   }
 }
 
