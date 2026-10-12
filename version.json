@@ -1,8 +1,8 @@
 {
-  "Version": "1.0.1",
-  "ReleaseNotes": "Обновление синхронизации!",
+  "Version": "1.0.2",
+  "ReleaseNotes": "Обновление MakiLauncher 1.0.2: улучшенная синхронизация со сборок, новое оформление, фикс скинов и автообновлений.",
   "DownloadUrl": "https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe",
   "SetupUrl": "https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe",
-  "Mandatory": true,
-  "PubDate": "12.10.2026"
+  "Mandatory": false,
+  "PubDate": "13.10.2026"
 }
