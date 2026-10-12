@@ -13,20 +13,6 @@
       "author": "Tokyo_own",
       "sizeMb": 1600,
       "banner": ""
-    },
-    {
-      "id": "atm10",
-      "name": "All The Mods 10",
-      "version": "1.0.1",
-      "minecraftVersion": "1.21.1",
-      "modLoader": "NeoForge",
-      "loaderVersion": "21.1.x",
-      "description": "All the Mods 10 — огромный модпак с сотнями модов для Minecraft 1.21.1.",
-      "downloadUrl": "https://drive.google.com/file/d/1Sbf_TcGY7iBIe8Ml5Yg5Zah_SyexG4VS/view?usp=sharing",
-      "clientFolder": "atm10",
-      "author": "Tokyo_own",
-      "sizeMb": 1600,
-      "banner": ""
     }
   ],
   "news": []
