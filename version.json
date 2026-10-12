@@ -1,6 +1,6 @@
 {
-  "Version": "1.0.0",
-  "ReleaseNotes": "Первая публикация лаунчера!",
+  "Version": "1.0.1",
+  "ReleaseNotes": "Обновление синхронизации!",
   "DownloadUrl": "https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe",
   "SetupUrl": "https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe",
   "Mandatory": true,
