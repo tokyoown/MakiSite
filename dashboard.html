@@ -483,11 +483,11 @@
       <div class="card">
         <div class="card-header"><div class="card-title">Параметры файла version.json</div></div>
         <div class="card-body">
-          <div class="version-badge">Текущая версия лаунчера: <span id="ver-current-label">1.0.4</span></div>
+          <div class="version-badge">Текущая версия лаунчера: <span id="ver-current-label">1.0.8</span></div>
           <div class="form-grid">
             <div class="form-group">
-              <label>Номер версии (например, 1.0.4)</label>
-              <input type="text" id="ver-num" placeholder="1.0.4" />
+              <label>Номер версии (например, 1.0.8)</label>
+              <input type="text" id="ver-num" placeholder="1.0.8" />
             </div>
             <div class="form-group">
               <label>Дата публикации</label>
@@ -779,7 +779,7 @@ sessionStorage.setItem(SESSION_KEY, 'true');
 let S = {
   modpacks: [],
   news: [],
-  version: { Version:'1.0.4', ReleaseNotes:'Обновление MakiLauncher 1.0.4: настраиваемые обложки сборок через сайт, новая иконка лаунчера и синхронизация игровых миров.', DownloadUrl:'https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe', SetupUrl:'https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe', Mandatory:false, PubDate:'13.10.2026' },
+  version: { Version:'1.0.8', ReleaseNotes:'Обновление MakiLauncher 1.0.8: сохранение настроек игрока (options.txt), защита от сброса при перезаходе, автоматическое фоновое обновление.', DownloadUrl:'https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe', SetupUrl:'https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe', Mandatory:true, PubDate:'13.10.2026' },
   github: { user:'tokyoown', repo:'MakiSite', token:'' }
 };
 
@@ -796,8 +796,8 @@ function loadState() {
       if (p && Array.isArray(p.news)) S.news = p.news;
       if (p && p.version) {
         S.version = p.version;
-        if (!S.version.Version || S.version.Version === '1.0.0' || S.version.Version === '1.0.1' || S.version.Version === '1.0.2' || S.version.Version === '1.0.3') {
-          S.version.Version = '1.0.4';
+        if (!S.version.Version || S.version.Version === '1.0.0' || S.version.Version === '1.0.1' || S.version.Version === '1.0.2' || S.version.Version === '1.0.3' || S.version.Version === '1.0.4' || S.version.Version === '1.0.5' || S.version.Version === '1.0.6' || S.version.Version === '1.0.7') {
+          S.version.Version = '1.0.8';
         }
       }
     }
@@ -1196,7 +1196,7 @@ async function deleteNews(i) {
 
 // ── Version ──
 function loadVersionInputs() {
-  document.getElementById('ver-num').value = S.version.Version || '1.0.4';
+  document.getElementById('ver-num').value = S.version.Version || '1.0.8';
   document.getElementById('ver-notes').value = S.version.ReleaseNotes || '';
   document.getElementById('ver-url').value = S.version.SetupUrl || S.version.DownloadUrl || 'https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe';
   document.getElementById('ver-mandatory').checked = S.version.Mandatory || false;
@@ -1212,7 +1212,7 @@ async function saveVersion() {
   if (raw) { const p = raw.split('-'); date = p[2] + '.' + p[1] + '.' + p[0]; }
   const url = document.getElementById('ver-url').value.trim();
   S.version = {
-    Version: v('ver-num') || '1.0.4',
+    Version: v('ver-num') || '1.0.8',
     ReleaseNotes: v('ver-notes'),
     DownloadUrl: url,
     SetupUrl: url,
