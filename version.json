@@ -1,6 +1,6 @@
 {
   "Version": "1.0.7",
-  "ReleaseNotes": "Обновление синхронизации и скины!",
+  "ReleaseNotes": "Изменение параметров запуска",
   "DownloadUrl": "https://github.com/tokyoown/MakiSite/releases/download/1.0.7/MakiLauncher-Setup.exe",
   "SetupUrl": "https://github.com/tokyoown/MakiSite/releases/download/1.0.7/MakiLauncher-Setup.exe",
   "Mandatory": true,
