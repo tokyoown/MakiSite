@@ -324,7 +324,7 @@
       <div>
         <div class="hero-tag">
           <span class="hero-tag-dot"></span>
-          <span id="hero-version-badge">ВЕРСИЯ v1.0.4 ОНЛАЙН • WINDOWS 64-BIT</span>
+          <span id="hero-version-badge">ВЕРСИЯ v1.0.8 ОНЛАЙН • WINDOWS 64-BIT</span>
         </div>
         <h1 class="hero-title">
           Персональный лаунчер с <span>кастомными сборками</span>
@@ -478,7 +478,7 @@ async function fetchLatestGitHubVersion() {
     const res = await fetch('https://api.github.com/repos/tokyoown/MakiSite/releases/latest');
     if (res.ok) {
       const data = await res.json();
-      const ver = (data.tag_name || data.name || 'v1.0.4').replace(/^v/i, '');
+      const ver = (data.tag_name || data.name || 'v1.0.8').replace(/^v/i, '');
       if (badge) badge.textContent = `ВЕРСИЯ ${ver} ОНЛАЙН • WINDOWS 64-BIT`;
 
       // If release asset has a direct download URL, update all setup download buttons
@@ -501,8 +501,8 @@ async function fetchLatestGitHubVersion() {
         }).catch(() => {});
     }
   } catch(e) {
-    // If offline/error, keep clean v1.0.4
-    if (badge) badge.textContent = 'ВЕРСИЯ 1.0.4 ОНЛАЙН • WINDOWS 64-BIT';
+    // If offline/error, keep clean v1.0.8
+    if (badge) badge.textContent = 'ВЕРСИЯ 1.0.8 ОНЛАЙН • WINDOWS 64-BIT';
   }
 }
 
