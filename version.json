@@ -1,8 +1,8 @@
 {
   "Version": "1.0.7",
   "ReleaseNotes": "Обновление синхронизации и скины!",
-  "DownloadUrl": "https://github.com/tokyoown/MakiSite/releases/download/1.0.6/MakiLauncher-Setup.exe",
-  "SetupUrl": "https://github.com/tokyoown/MakiSite/releases/download/1.0.6/MakiLauncher-Setup.exe",
+  "DownloadUrl": "https://github.com/tokyoown/MakiSite/releases/download/1.0.7/MakiLauncher-Setup.exe",
+  "SetupUrl": "https://github.com/tokyoown/MakiSite/releases/download/1.0.7/MakiLauncher-Setup.exe",
   "Mandatory": true,
   "PubDate": "13.10.2026"
 }
