@@ -249,7 +249,17 @@ function doLogin(e) {
     const login = document.getElementById('username').value.trim();
     const pass = document.getElementById('password').value;
 
-    if (login === CREDENTIALS.login && pass === CREDENTIALS.password) {
+    let isValid = (login === CREDENTIALS.login && pass === CREDENTIALS.password);
+    try {
+      const custom = JSON.parse(localStorage.getItem('maki_admin_creds') || 'null');
+      if (custom && custom.login && custom.password) {
+        if (login === custom.login.trim() && pass === custom.password) {
+          isValid = true;
+        }
+      }
+    } catch(e) {}
+
+    if (isValid) {
       // Set session
       sessionStorage.setItem(SESSION_KEY, btoa(login + ':' + Date.now()));
       // Redirect
