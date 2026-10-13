@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MakiLauncher — Панель управления</title>
+<script>
+(function() {
+  const SESSION_KEY = 'maki_admin_session';
+  if (!sessionStorage.getItem(SESSION_KEY)) {
+    document.documentElement.style.display = 'none';
+    window.location.replace('login.html');
+  }
+})();
+</script>
 <link rel="icon" type="image/png" href="assets/icon.png">
 <link rel="shortcut icon" href="favicon.ico">
 <style>
@@ -617,6 +626,28 @@
         </div>
       </div>
       <div class="card">
+        <div class="card-header"><div class="card-title">Безопасность (Логин и Пароль администратора)</div></div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">
+            Панель управления защищена паролем. Вы можете сменить логин и пароль в любой момент:
+          </p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Логин администратора</label>
+              <input type="text" id="admin-login-input" placeholder="tokyo_own_admin" />
+            </div>
+            <div class="form-group">
+              <label>Новый пароль</label>
+              <input type="password" id="admin-pass-input" placeholder="Введите пароль" />
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="saveAdminCreds()">Сохранить новые данные входа</button>
+            <button class="btn btn-secondary" onclick="resetAdminCreds()">Сбросить на стандартные</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
         <div class="card-header"><div class="card-title">Сброс данных</div></div>
         <div class="card-body">
           <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Очистить кэш браузера (сборки и новости будут заново загружены из manifest.json).</p>
@@ -773,8 +804,10 @@ const SESSION_KEY = 'maki_admin_session';
 const GH_KEY = 'maki_github';
 const DATA_KEY = 'maki_data';
 
-// Auto-authenticate so the user doesn't get locked out
-sessionStorage.setItem(SESSION_KEY, 'true');
+// Enforce login verification
+if (!sessionStorage.getItem(SESSION_KEY)) {
+  window.location.replace('login.html');
+}
 
 let S = {
   modpacks: [],
@@ -1426,9 +1459,38 @@ document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e
   if (e.target === o) o.classList.remove('open');
 }));
 
+function loadAdminCreds() {
+  try {
+    const custom = JSON.parse(localStorage.getItem('maki_admin_creds') || 'null');
+    const loginInp = document.getElementById('admin-login-input');
+    const passInp = document.getElementById('admin-pass-input');
+    if (loginInp) loginInp.value = (custom && custom.login) ? custom.login : 'tokyo_own_admin';
+    if (passInp) passInp.value = (custom && custom.password) ? custom.password : 'po_ke_monA_z987';
+  } catch(e) {}
+}
+
+function saveAdminCreds() {
+  const login = document.getElementById('admin-login-input').value.trim();
+  const pass = document.getElementById('admin-pass-input').value;
+  if (!login || !pass) {
+    alert('Логин и пароль не могут быть пустыми!');
+    return;
+  }
+  localStorage.setItem('maki_admin_creds', JSON.stringify({ login: login, password: pass }));
+  toast('Данные входа успешно сохранены!', 'success');
+}
+
+function resetAdminCreds() {
+  if (!confirm('Сбросить логин и пароль на стандартные (tokyo_own_admin)?')) return;
+  localStorage.removeItem('maki_admin_creds');
+  loadAdminCreds();
+  toast('Логин и пароль сброшены на стандартные', 'info');
+}
+
 // Init
 loadState();
 renderAll();
+loadAdminCreds();
 refreshExports();
 fetchLiveDownloads();
 </script>
