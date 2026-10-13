@@ -1,8 +1,8 @@
 {
   "Version": "1.0.8",
-  "ReleaseNotes": "Обновление MakiLauncher 1.0.8: сохранение настроек игрока (options.txt), защита от сброса при перезаходе, автоматическое фоновое обновление.",
-  "DownloadUrl": "https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe",
-  "SetupUrl": "https://github.com/tokyoown/MakiSite/releases/latest/download/MakiLauncher-Setup.exe",
+  "ReleaseNotes": "Изменение параметров запуска",
+  "DownloadUrl": "https://github.com/tokyoown/MakiSite/releases/download/1.0.7/MakiLauncher-Setup.exe",
+  "SetupUrl": "https://github.com/tokyoown/MakiSite/releases/download/1.0.7/MakiLauncher-Setup.exe",
   "Mandatory": true,
   "PubDate": "13.10.2026"
 }
