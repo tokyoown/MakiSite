@@ -3,7 +3,7 @@
     {
       "id": "atm10",
       "name": "All The Mods 10",
-      "version": "1.0.8",
+      "version": "1.0.7",
       "minecraftVersion": "1.21.1",
       "modLoader": "NeoForge",
       "loaderVersion": "21.1.x",
